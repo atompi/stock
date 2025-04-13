@@ -158,3 +158,7 @@ cython_debug/
 .idea/
 
 docker.*
+
+/stock/
+/cron/
+ta-lib-0.6.4-src.tar.gz

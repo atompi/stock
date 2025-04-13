@@ -2,13 +2,15 @@
 # https://hub.docker.com/_/python/tags?page=1&name=3.11-slim-bullseye
 FROM docker.io/python:3.11-slim-bullseye
 
-MAINTAINER myh
+MAINTAINER atompi
 #增加语言utf-8
 ENV LANG=zh_CN.UTF-8
 ENV LC_CTYPE=zh_CN.UTF-8
 ENV LC_ALL=C
 ENV PYTHONPATH=/data/InStock
 EXPOSE 9988
+
+COPY ta-lib-0.6.4-src.tar.gz ./ta-lib-0.6.4-src.tar.gz
 
 # 使用国内镜像地址加速。修改debian apt更新地址，pip地址，设置时区
 # https://opsx.alibaba.com/mirror
@@ -27,6 +29,7 @@ trusted-host = mirrors.aliyun.com" > /etc/pip.conf && \
     apt-get install -y cron gcc make python3-dev default-libmysqlclient-dev build-essential pkg-config curl && \
     pip install supervisor && \
     pip install mysqlclient && \
+    pip install cryptography && \
     pip install requests && \
     pip install arrow && \
     pip install numpy && \
@@ -43,7 +46,7 @@ trusted-host = mirrors.aliyun.com" > /etc/pip.conf && \
     pip install mini-racer && \
     pip install easytrader && \
     mkdir ta-lib && \
-    curl -SL $(curl -s https://api.github.com/repos/ta-lib/ta-lib/releases/latest | grep browser_download_url | cut -d'"' -f4 |grep -E 'tar.gz$') | tar -xz --strip-components=1 -C ./ta-lib && \
+    tar -xz --strip-components=1 -f ta-lib-0.6.4-src.tar.gz -C ./ta-lib && \
     cd ta-lib/ && \
     ./configure && \
     make && \
