@@ -9,10 +9,12 @@ import pandas as pd
 import requests
 from tqdm import tqdm
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
 
-def stock_lhb_detail_em(
-    start_date: str = "20230403", end_date: str = "20230417"
-) -> pd.DataFrame:
+
+def stock_lhb_detail_em(start_date: str = "20230403", end_date: str = "20230417") -> pd.DataFrame:
     """
     东方财富网-数据中心-龙虎榜单-龙虎榜详情
     https://data.eastmoney.com/stock/tradedetail.html
@@ -37,7 +39,7 @@ def stock_lhb_detail_em(
         "client": "WEB",
         "filter": f"(TRADE_DATE<='{end_date}')(TRADE_DATE>='{start_date}')",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page_num = data_json["result"]["pages"]
     big_df = pd.DataFrame()
@@ -47,7 +49,7 @@ def stock_lhb_detail_em(
                 "pageNumber": page,
             }
         )
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -153,7 +155,7 @@ def stock_lhb_stock_statistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICS_CYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -213,9 +215,7 @@ def stock_lhb_stock_statistic_em(symbol: str = "近一月") -> pd.DataFrame:
     return temp_df
 
 
-def stock_lhb_jgmmtj_em(
-    start_date: str = "20220906", end_date: str = "20220906"
-) -> pd.DataFrame:
+def stock_lhb_jgmmtj_em(start_date: str = "20220906", end_date: str = "20220906") -> pd.DataFrame:
     """
     东方财富网-数据中心-龙虎榜单-机构买卖每日统计
     https://data.eastmoney.com/stock/jgmmtj.html
@@ -240,7 +240,7 @@ def stock_lhb_jgmmtj_em(
         "client": "WEB",
         "filter": f"(TRADE_DATE>='{start_date}')(TRADE_DATE<='{end_date}')",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -336,13 +336,13 @@ def stock_lhb_jgstatistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -406,9 +406,7 @@ def stock_lhb_jgstatistic_em(symbol: str = "近一月") -> pd.DataFrame:
     return big_df
 
 
-def stock_lhb_hyyyb_em(
-    start_date: str = "20220324", end_date: str = "20220324"
-) -> pd.DataFrame:
+def stock_lhb_hyyyb_em(start_date: str = "20220324", end_date: str = "20220324") -> pd.DataFrame:
     """
     东方财富网-数据中心-龙虎榜单-每日活跃营业部
     https://data.eastmoney.com/stock/jgmmtj.html
@@ -433,14 +431,14 @@ def stock_lhb_hyyyb_em(
         "client": "WEB",
         "filter": f"(ONLIST_DATE>='{start_date}')(ONLIST_DATE<='{end_date}')",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
 
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -511,13 +509,13 @@ def stock_lhb_yybph_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -616,13 +614,13 @@ def stock_lhb_traderstatistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -684,7 +682,7 @@ def stock_lhb_stock_detail_date_em(symbol: str = "600077") -> pd.DataFrame:
         "source": "WEB",
         "client": "WEB",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -706,9 +704,7 @@ def stock_lhb_stock_detail_date_em(symbol: str = "600077") -> pd.DataFrame:
     return temp_df
 
 
-def stock_lhb_stock_detail_em(
-    symbol: str = "000788", date: str = "20220315", flag: str = "卖出"
-) -> pd.DataFrame:
+def stock_lhb_stock_detail_em(symbol: str = "000788", date: str = "20220315", flag: str = "卖出") -> pd.DataFrame:
     """
     东方财富网-数据中心-龙虎榜单-个股龙虎榜详情
     https://data.eastmoney.com/stock/lhb/600077.html
@@ -742,7 +738,7 @@ def stock_lhb_stock_detail_em(
         "client": "WEB",
         "_": "1647338693644",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -838,9 +834,7 @@ def stock_lhb_stock_detail_em(
 
 
 if __name__ == "__main__":
-    stock_lhb_detail_em_df = stock_lhb_detail_em(
-        start_date="20230403", end_date="20230417"
-    )
+    stock_lhb_detail_em_df = stock_lhb_detail_em(start_date="20230403", end_date="20230417")
     print(stock_lhb_detail_em_df)
 
     stock_lhb_stock_statistic_em_df = stock_lhb_stock_statistic_em(symbol="近一月")
@@ -855,17 +849,13 @@ if __name__ == "__main__":
     stock_lhb_stock_statistic_em_df = stock_lhb_stock_statistic_em(symbol="近一年")
     print(stock_lhb_stock_statistic_em_df)
 
-    stock_lhb_jgmmtj_em_df = stock_lhb_jgmmtj_em(
-        start_date="20220904", end_date="20220906"
-    )
+    stock_lhb_jgmmtj_em_df = stock_lhb_jgmmtj_em(start_date="20220904", end_date="20220906")
     print(stock_lhb_jgmmtj_em_df)
 
     stock_lhb_jgstatistic_em_df = stock_lhb_jgstatistic_em(symbol="近一月")
     print(stock_lhb_jgstatistic_em_df)
 
-    stock_lhb_hyyyb_em_df = stock_lhb_hyyyb_em(
-        start_date="20220324", end_date="20220324"
-    )
+    stock_lhb_hyyyb_em_df = stock_lhb_hyyyb_em(start_date="20220324", end_date="20220324")
     print(stock_lhb_hyyyb_em_df)
 
     stock_lhb_yybph_em_df = stock_lhb_yybph_em(symbol="近一月")
@@ -877,12 +867,8 @@ if __name__ == "__main__":
     stock_lhb_stock_detail_date_em_df = stock_lhb_stock_detail_date_em(symbol="002901")
     print(stock_lhb_stock_detail_date_em_df)
 
-    stock_lhb_stock_detail_em_df = stock_lhb_stock_detail_em(
-        symbol="002901", date="20221012", flag="买入"
-    )
+    stock_lhb_stock_detail_em_df = stock_lhb_stock_detail_em(symbol="002901", date="20221012", flag="买入")
     print(stock_lhb_stock_detail_em_df)
 
-    stock_lhb_stock_detail_em_df = stock_lhb_stock_detail_em(
-        symbol="600016", date="20220324", flag="买入"
-    )
+    stock_lhb_stock_detail_em_df = stock_lhb_stock_detail_em(symbol="600016", date="20220324", flag="买入")
     print(stock_lhb_stock_detail_em_df)

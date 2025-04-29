@@ -2,12 +2,19 @@
 # !/usr/bin/env python
 
 import math
+
 import pandas as pd
 import requests
+
 import instock.core.tablestructure as tbs
 
 __author__ = 'myh '
 __date__ = '2023/5/9 '
+
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
 
 
 def stock_selection() -> pd.DataFrame:
@@ -30,24 +37,24 @@ def stock_selection() -> pd.DataFrame:
         "p": page_current,
         "ps": page_size,
         "source": "SELECT_SECURITIES",
-        "client": "WEB"
+        "client": "WEB",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["result"]["data"]
     if not data:
         return pd.DataFrame()
 
     data_count = data_json["result"]["count"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["p"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["result"]["data"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df = pd.DataFrame(data)
 
@@ -74,16 +81,9 @@ def stock_selection_params():
     :rtype: pandas.DataFrame
     """
     url = "https://datacenter-web.eastmoney.com/wstock/selection/api/data/get"
-    params = {
-        "type": "RPTA_PCNEW_WHOLE",
-        "sty": "ALL",
-        "p": 1,
-        "ps": 50000,
-        "source": "SELECT_SECURITIES",
-        "client": "WEB"
-    }
+    params = {"type": "RPTA_PCNEW_WHOLE", "sty": "ALL", "p": 1, "ps": 50000, "source": "SELECT_SECURITIES", "client": "WEB"}
 
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     zxzb = data_json["zxzb"]  # 指标
     print(zxzb)

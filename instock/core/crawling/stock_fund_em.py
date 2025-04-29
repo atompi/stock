@@ -6,15 +6,18 @@ Desc: 东方财富网-数据中心-资金流向
 https://data.eastmoney.com/zjlx/detail.html
 """
 import json
-import time
-from functools import lru_cache
 import math
+import time
 
 import pandas as pd
 import requests
 
 __author__ = 'myh '
 __date__ = '2023/6/12 '
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
 
 
 def stock_individual_fund_flow_rank(indicator: str = "5日") -> pd.DataFrame:
@@ -59,19 +62,19 @@ def stock_individual_fund_flow_rank(indicator: str = "5日") -> pd.DataFrame:
         "fs": "m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2,m:0+t:7+f:!2,m:1+t:3+f:!2",
         "fields": indicator_map[indicator][1],
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["data"]["diff"]
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df = pd.DataFrame(data)
     temp_df = temp_df[~temp_df["f2"].isin(["-"])]
@@ -235,9 +238,7 @@ def stock_individual_fund_flow_rank(indicator: str = "5日") -> pd.DataFrame:
     return temp_df
 
 
-def stock_sector_fund_flow_rank(
-    indicator: str = "10日", sector_type: str = "行业资金流"
-) -> pd.DataFrame:
+def stock_sector_fund_flow_rank(indicator: str = "10日", sector_type: str = "行业资金流") -> pd.DataFrame:
     """
     东方财富网-数据中心-资金流向-板块资金流-排名
     https://data.eastmoney.com/bkzj/hy.html
@@ -294,19 +295,18 @@ def stock_sector_fund_flow_rank(
     data = data_json["data"]["diff"]
 
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
         r = requests.get(url, params=params, headers=headers)
         text_data = r.text
-        json_data = json.loads(text_data[text_data.find("{"): -2])
+        json_data = json.loads(text_data[text_data.find("{") : -2])
         _data = json_data["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df = pd.DataFrame(data)
-
 
     temp_df = temp_df[~temp_df["f2"].isin(["-"])]
     if indicator == "今日":
@@ -440,17 +440,11 @@ if __name__ == "__main__":
     stock_individual_fund_flow_rank_df = stock_individual_fund_flow_rank(indicator="5日")
     print(stock_individual_fund_flow_rank_df)
 
-    stock_individual_fund_flow_rank_df = stock_individual_fund_flow_rank(
-        indicator="10日"
-    )
+    stock_individual_fund_flow_rank_df = stock_individual_fund_flow_rank(indicator="10日")
     print(stock_individual_fund_flow_rank_df)
 
-    stock_sector_fund_flow_rank_df = stock_sector_fund_flow_rank(
-        indicator="5日", sector_type="概念资金流"
-    )
+    stock_sector_fund_flow_rank_df = stock_sector_fund_flow_rank(indicator="5日", sector_type="概念资金流")
     print(stock_sector_fund_flow_rank_df)
 
-    stock_sector_fund_flow_rank_df = stock_sector_fund_flow_rank(
-        indicator="今日", sector_type="行业资金流"
-    )
+    stock_sector_fund_flow_rank_df = stock_sector_fund_flow_rank(indicator="今日", sector_type="行业资金流")
     print(stock_sector_fund_flow_rank_df)

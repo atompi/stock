@@ -3,11 +3,15 @@
 
 import pandas as pd
 import requests
+
 import instock.core.tablestructure as tbs
 
 __author__ = 'myh '
 __date__ = '2023/5/7 '
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
 
 
 def stock_cpbd_em(symbol: str = "688041") -> pd.DataFrame:
@@ -26,7 +30,7 @@ def stock_cpbd_em(symbol: str = "688041") -> pd.DataFrame:
         symbol = f"SZ{symbol}"
     params = {"code": symbol}
 
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     zxzb = data_json["zxzb"]  # 主要指标
     if len(zxzb) < 1:
@@ -78,7 +82,6 @@ def stock_cpbd_em(symbol: str = "688041") -> pd.DataFrame:
 
     tbs.CN_STOCK_CPBD
 
-
     # temp_df["报告期"] = pd.to_datetime(temp_df["报告期"], errors="coerce").dt.date
     # temp_df["每股收益"] = pd.to_numeric(temp_df["每股收益"], errors="coerce")
     # temp_df["每股净资产"] = pd.to_numeric(temp_df["每股净资产"], errors="coerce")
@@ -121,17 +124,16 @@ def stock_zjlx_em(symbol: str = "688041") -> pd.DataFrame:
         "fields1": "f1,f2,f3,f7",
         "fields2": "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65",
         "ut": "b2884a393a59ad64002292a3e90d46a5",
-        "secid": symbol
+        "secid": symbol,
     }
 
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     klines = data_json["klines"]  # 主要指标
-    "日期","主力净流入额","小单净流入额","中单净流入额","大单净流入额","超大单净流入额","主力净流入占比", "小单净流入占比", "中单净流入占比", "大单净流入占比", "超大单净流入占比"
-    "收盘价","涨跌幅"
+    "日期", "主力净流入额", "小单净流入额", "中单净流入额", "大单净流入额", "超大单净流入额", "主力净流入占比", "小单净流入占比", "中单净流入占比", "大单净流入占比", "超大单净流入占比"
+    "收盘价", "涨跌幅"
     if len(klines) < 1:
         return None
-
 
 
 if __name__ == "__main__":
