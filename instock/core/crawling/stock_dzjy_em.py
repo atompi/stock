@@ -8,6 +8,10 @@ http://data.eastmoney.com/dzjy/dzjy_sctj.aspx
 import pandas as pd
 import requests
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
+
 
 def stock_dzjy_sctj() -> pd.DataFrame:
     """
@@ -27,13 +31,13 @@ def stock_dzjy_sctj() -> pd.DataFrame:
         'source': 'WEB',
         'client': 'WEB',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = int(data_json['result']["pages"])
     big_df = pd.DataFrame()
-    for page in range(1, total_page+1):
+    for page in range(1, total_page + 1):
         params.update({'pageNumber': page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json['result']["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -90,9 +94,9 @@ def stock_dzjy_mrmx(symbol: str = '基金', start_date: str = '20220104', end_da
         'columns': 'TRADE_DATE,SECURITY_CODE,SECUCODE,SECURITY_NAME_ABBR,CHANGE_RATE,CLOSE_PRICE,DEAL_PRICE,PREMIUM_RATIO,DEAL_VOLUME,DEAL_AMT,TURNOVER_RATE,BUYER_NAME,SELLER_NAME,CHANGE_RATE_1DAYS,CHANGE_RATE_5DAYS,CHANGE_RATE_10DAYS,CHANGE_RATE_20DAYS,BUYER_CODE,SELLER_CODE',
         'source': 'WEB',
         'client': 'WEB',
-        'filter': f"""(SECURITY_TYPE_WEB={symbol_map[symbol]})(TRADE_DATE>='{'-'.join([start_date[:4], start_date[4:6], start_date[6:]])}')(TRADE_DATE<='{'-'.join([end_date[:4], end_date[4:6], end_date[6:]])}')"""
+        'filter': f"""(SECURITY_TYPE_WEB={symbol_map[symbol]})(TRADE_DATE>='{'-'.join([start_date[:4], start_date[4:6], start_date[6:]])}')(TRADE_DATE<='{'-'.join([end_date[:4], end_date[4:6], end_date[6:]])}')""",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     if not data_json['result']["data"]:
         return pd.DataFrame()
@@ -123,21 +127,23 @@ def stock_dzjy_mrmx(symbol: str = '基金', start_date: str = '20220104', end_da
             "_",
         ]
         temp_df["交易日期"] = pd.to_datetime(temp_df["交易日期"]).dt.date
-        temp_df = temp_df[[
-            "序号",
-            "交易日期",
-            "证券代码",
-            "证券简称",
-            "涨跌幅",
-            "收盘价",
-            "成交价",
-            "折溢率",
-            "成交量",
-            "成交额",
-            "成交额/流通市值",
-            "买方营业部",
-            "卖方营业部",
-        ]]
+        temp_df = temp_df[
+            [
+                "序号",
+                "交易日期",
+                "证券代码",
+                "证券简称",
+                "涨跌幅",
+                "收盘价",
+                "成交价",
+                "折溢率",
+                "成交量",
+                "成交额",
+                "成交额/流通市值",
+                "买方营业部",
+                "卖方营业部",
+            ]
+        ]
         temp_df['涨跌幅'] = pd.to_numeric(temp_df['涨跌幅'])
         temp_df['收盘价'] = pd.to_numeric(temp_df['收盘价'])
         temp_df['成交价'] = pd.to_numeric(temp_df['成交价'])
@@ -169,17 +175,19 @@ def stock_dzjy_mrmx(symbol: str = '基金', start_date: str = '20220104', end_da
             "_",
         ]
         temp_df["交易日期"] = pd.to_datetime(temp_df["交易日期"]).dt.date
-        temp_df = temp_df[[
-            "序号",
-            "交易日期",
-            "证券代码",
-            "证券简称",
-            "成交价",
-            "成交量",
-            "成交额",
-            "买方营业部",
-            "卖方营业部",
-        ]]
+        temp_df = temp_df[
+            [
+                "序号",
+                "交易日期",
+                "证券代码",
+                "证券简称",
+                "成交价",
+                "成交量",
+                "成交额",
+                "买方营业部",
+                "卖方营业部",
+            ]
+        ]
         temp_df['成交价'] = pd.to_numeric(temp_df['成交价'])
         temp_df['成交量'] = pd.to_numeric(temp_df['成交量'])
         temp_df['成交额'] = pd.to_numeric(temp_df['成交额'])
@@ -207,9 +215,9 @@ def stock_dzjy_mrtj(start_date: str = '20220105', end_date: str = '20220105') ->
         'columns': 'TRADE_DATE,SECURITY_CODE,SECUCODE,SECURITY_NAME_ABBR,CHANGE_RATE,CLOSE_PRICE,AVERAGE_PRICE,PREMIUM_RATIO,DEAL_NUM,VOLUME,DEAL_AMT,TURNOVERRATE,D1_CLOSE_ADJCHRATE,D5_CLOSE_ADJCHRATE,D10_CLOSE_ADJCHRATE,D20_CLOSE_ADJCHRATE',
         'source': 'WEB',
         'client': 'WEB',
-        'filter': f"(TRADE_DATE>='{'-'.join([start_date[:4], start_date[4:6], start_date[6:]])}')(TRADE_DATE<='{'-'.join([end_date[:4], end_date[4:6], end_date[6:]])}')"
+        'filter': f"(TRADE_DATE>='{'-'.join([start_date[:4], start_date[4:6], start_date[6:]])}')(TRADE_DATE<='{'-'.join([end_date[:4], end_date[4:6], end_date[6:]])}')",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json['result']["data"])
     temp_df.reset_index(inplace=True)
@@ -234,20 +242,22 @@ def stock_dzjy_mrtj(start_date: str = '20220105', end_date: str = '20220105') ->
         "_",
     ]
     temp_df["交易日期"] = pd.to_datetime(temp_df["交易日期"]).dt.date
-    temp_df = temp_df[[
-        "序号",
-        "交易日期",
-        "证券代码",
-        "证券简称",
-        "收盘价",
-        "涨跌幅",
-        "成交价",
-        "折溢率",
-        "成交笔数",
-        "成交总量",
-        "成交总额",
-        "成交总额/流通市值",
-    ]]
+    temp_df = temp_df[
+        [
+            "序号",
+            "交易日期",
+            "证券代码",
+            "证券简称",
+            "收盘价",
+            "涨跌幅",
+            "成交价",
+            "折溢率",
+            "成交笔数",
+            "成交总量",
+            "成交总额",
+            "成交总额/流通市值",
+        ]
+    ]
     temp_df['涨跌幅'] = pd.to_numeric(temp_df['涨跌幅'])
     temp_df['收盘价'] = pd.to_numeric(temp_df['收盘价'])
     temp_df['成交价'] = pd.to_numeric(temp_df['成交价'])
@@ -286,13 +296,13 @@ def stock_dzjy_hygtj(symbol: str = '近三月') -> pd.DataFrame:
         'client': 'WEB',
         'filter': f'(DATE_TYPE_CODE={period_map[symbol]})',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json['result']["pages"]
     big_df = pd.DataFrame()
-    for page in range(1, int(total_page)+1):
+    for page in range(1, int(total_page) + 1):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json['result']["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -318,24 +328,26 @@ def stock_dzjy_hygtj(symbol: str = '近三月') -> pd.DataFrame:
         "上榜日后平均涨跌幅-20日",
         "_",
     ]
-    big_df = big_df[[
-        "序号",
-        "证券代码",
-        "证券简称",
-        "最新价",
-        "涨跌幅",
-        "最近上榜日",
-        "上榜次数-总计",
-        "上榜次数-溢价",
-        "上榜次数-折价",
-        "总成交额",
-        "折溢率",
-        "成交总额/流通市值",
-        "上榜日后平均涨跌幅-1日",
-        "上榜日后平均涨跌幅-5日",
-        "上榜日后平均涨跌幅-10日",
-        "上榜日后平均涨跌幅-20日",
-    ]]
+    big_df = big_df[
+        [
+            "序号",
+            "证券代码",
+            "证券简称",
+            "最新价",
+            "涨跌幅",
+            "最近上榜日",
+            "上榜次数-总计",
+            "上榜次数-溢价",
+            "上榜次数-折价",
+            "总成交额",
+            "折溢率",
+            "成交总额/流通市值",
+            "上榜日后平均涨跌幅-1日",
+            "上榜日后平均涨跌幅-5日",
+            "上榜日后平均涨跌幅-10日",
+            "上榜日后平均涨跌幅-20日",
+        ]
+    ]
     big_df["最近上榜日"] = pd.to_datetime(big_df["最近上榜日"]).dt.date
     big_df["最新价"] = pd.to_numeric(big_df["最新价"])
     big_df["涨跌幅"] = pd.to_numeric(big_df["涨跌幅"])
@@ -380,13 +392,13 @@ def stock_dzjy_hyyybtj(symbol: str = '近3日') -> pd.DataFrame:
         'client': 'WEB',
         'filter': f'(N_DATE=-{period_map[symbol]})',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json['result']["pages"]
     big_df = pd.DataFrame()
-    for page in range(1, int(total_page)+1):
+    for page in range(1, int(total_page) + 1):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json['result']["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -405,17 +417,19 @@ def stock_dzjy_hyyybtj(symbol: str = '近3日') -> pd.DataFrame:
         "成交金额统计-净买入额",
         "_",
     ]
-    big_df = big_df[[
-        "序号",
-        "最近上榜日",
-        "营业部名称",
-        "次数总计-买入",
-        "次数总计-卖出",
-        "成交金额统计-买入",
-        "成交金额统计-卖出",
-        "成交金额统计-净买入额",
-        "买入的股票",
-    ]]
+    big_df = big_df[
+        [
+            "序号",
+            "最近上榜日",
+            "营业部名称",
+            "次数总计-买入",
+            "次数总计-卖出",
+            "成交金额统计-买入",
+            "成交金额统计-卖出",
+            "成交金额统计-净买入额",
+            "买入的股票",
+        ]
+    ]
     big_df["最近上榜日"] = pd.to_datetime(big_df["最近上榜日"]).dt.date
     big_df["次数总计-买入"] = pd.to_numeric(big_df["次数总计-买入"])
     big_df["次数总计-卖出"] = pd.to_numeric(big_df["次数总计-卖出"])
@@ -452,13 +466,13 @@ def stock_dzjy_yybph(symbol: str = '近三月') -> pd.DataFrame:
         'client': 'WEB',
         'filter': f'(N_DATE=-{period_map[symbol]})',
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     total_page = data_json['result']["pages"]
     big_df = pd.DataFrame()
-    for page in range(1, int(total_page)+1):
+    for page in range(1, int(total_page) + 1):
         params.update({"pageNumber": page})
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json['result']["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
@@ -484,22 +498,24 @@ def stock_dzjy_yybph(symbol: str = '近三月') -> pd.DataFrame:
         "_",
         "_",
     ]
-    big_df = big_df[[
-        "序号",
-        "营业部名称",
-        "上榜后1天-买入次数",
-        "上榜后1天-平均涨幅",
-        "上榜后1天-上涨概率",
-        "上榜后5天-买入次数",
-        "上榜后5天-平均涨幅",
-        "上榜后5天-上涨概率",
-        "上榜后10天-买入次数",
-        "上榜后10天-平均涨幅",
-        "上榜后10天-上涨概率",
-        "上榜后20天-买入次数",
-        "上榜后20天-平均涨幅",
-        "上榜后20天-上涨概率",
-    ]]
+    big_df = big_df[
+        [
+            "序号",
+            "营业部名称",
+            "上榜后1天-买入次数",
+            "上榜后1天-平均涨幅",
+            "上榜后1天-上涨概率",
+            "上榜后5天-买入次数",
+            "上榜后5天-平均涨幅",
+            "上榜后5天-上涨概率",
+            "上榜后10天-买入次数",
+            "上榜后10天-平均涨幅",
+            "上榜后10天-上涨概率",
+            "上榜后20天-买入次数",
+            "上榜后20天-平均涨幅",
+            "上榜后20天-上涨概率",
+        ]
+    ]
     big_df['上榜后1天-买入次数'] = pd.to_numeric(big_df['上榜后1天-买入次数'])
     big_df['上榜后1天-平均涨幅'] = pd.to_numeric(big_df['上榜后1天-平均涨幅'])
     big_df['上榜后1天-上涨概率'] = pd.to_numeric(big_df['上榜后1天-上涨概率'])

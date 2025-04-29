@@ -2,7 +2,7 @@
 # https://hub.docker.com/_/python/tags?page=1&name=3.11-slim-bullseye
 FROM docker.io/python:3.11-slim-bullseye
 
-MAINTAINER atompi
+LABEL org.opencontainers.image.authors="atompi"
 #增加语言utf-8
 ENV LANG=zh_CN.UTF-8
 ENV LC_CTYPE=zh_CN.UTF-8

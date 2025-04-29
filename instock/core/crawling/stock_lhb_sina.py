@@ -13,6 +13,10 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
+
 
 def stock_lhb_detail_daily_sina(date: str = "20240222") -> pd.DataFrame:
     """
@@ -26,11 +30,9 @@ def stock_lhb_detail_daily_sina(date: str = "20240222") -> pd.DataFrame:
     date = "-".join([date[:4], date[4:6], date[6:]])
     url = "https://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/lhb/index.phtml"
     params = {"tradedate": date}
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     soup = BeautifulSoup(r.text, features="lxml")
-    selected_html = soup.find(name="div", attrs={"class": "list"}).find_all(
-        name="table", attrs={"class": "list_table"}
-    )
+    selected_html = soup.find(name="div", attrs={"class": "list"}).find_all(name="table", attrs={"class": "list_table"})
     big_df = pd.DataFrame()
     for table in selected_html:
         temp_df = pd.read_html(StringIO(table.prettify()), header=0, skiprows=1)[0]
@@ -64,7 +66,7 @@ def _find_last_page(
         "last": recent_day,
         "p": "1",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     soup = BeautifulSoup(r.text, "lxml")
     try:
         previous_page = int(soup.find_all(attrs={"class": "page"})[-2].text)
@@ -76,7 +78,7 @@ def _find_last_page(
                 "last": recent_day,
                 "p": previous_page,
             }
-            r = requests.get(url, params=params)
+            r = requests.get(url, params=params, headers=headers)
             soup = BeautifulSoup(r.text, features="lxml")
             last_page = int(soup.find_all(attrs={"class": "page"})[-2].text)
             if last_page != previous_page:
@@ -96,9 +98,7 @@ def stock_lhb_ggtj_sina(symbol: str = "5") -> pd.DataFrame:
     :return: 龙虎榜-个股上榜统计
     :rtype: pandas.DataFrame
     """
-    url = (
-        "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/ggtj/index.phtml"
-    )
+    url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/ggtj/index.phtml"
     last_page_num = _find_last_page(url, symbol)
     big_df = pd.DataFrame()
     for page in tqdm(range(1, last_page_num + 1), leave=False):
@@ -106,7 +106,7 @@ def stock_lhb_ggtj_sina(symbol: str = "5") -> pd.DataFrame:
             "last": symbol,
             "p": page,
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         temp_df = pd.read_html(StringIO(r.text))[0].iloc[0:, :]
         big_df = pd.concat(objs=[big_df, temp_df], ignore_index=True)
     big_df["股票代码"] = big_df["股票代码"].astype(str).str.zfill(6)
@@ -132,9 +132,7 @@ def stock_lhb_yytj_sina(symbol: str = "5") -> pd.DataFrame:
     :return: 龙虎榜-营业部上榜统计
     :rtype: pandas.DataFrame
     """
-    url = (
-        "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/yytj/index.phtml"
-    )
+    url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/yytj/index.phtml"
     last_page_num = _find_last_page(url, symbol)
     big_df = pd.DataFrame()
     for page in tqdm(range(1, last_page_num + 1), leave=False):
@@ -142,7 +140,7 @@ def stock_lhb_yytj_sina(symbol: str = "5") -> pd.DataFrame:
             "last": "5",
             "p": page,
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         temp_df = pd.read_html(StringIO(r.text))[0].iloc[0:, :]
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
     big_df.columns = [
@@ -169,9 +167,7 @@ def stock_lhb_jgzz_sina(symbol: str = "5") -> pd.DataFrame:
     :return: 龙虎榜-机构席位追踪
     :rtype: pandas.DataFrame
     """
-    url = (
-        "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgzz/index.phtml"
-    )
+    url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgzz/index.phtml"
     last_page_num = _find_last_page(url, symbol)
     big_df = pd.DataFrame()
     for page in tqdm(range(1, last_page_num + 1), leave=False):
@@ -179,7 +175,7 @@ def stock_lhb_jgzz_sina(symbol: str = "5") -> pd.DataFrame:
             "last": symbol,
             "p": page,
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         temp_df = pd.read_html(StringIO(r.text))[0].iloc[0:, :]
         if temp_df.empty:
             continue
@@ -208,13 +204,11 @@ def stock_lhb_jgmx_sina() -> pd.DataFrame:
     :return: 龙虎榜-机构席位成交明细
     :rtype: pandas.DataFrame
     """
-    url = (
-        "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgmx/index.phtml"
-    )
+    url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgmx/index.phtml"
     params = {
         "p": "1",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     soup = BeautifulSoup(r.text, features="lxml")
     try:
         last_page_num = int(soup.find_all(attrs={"class": "page"})[-2].text)
@@ -225,7 +219,7 @@ def stock_lhb_jgmx_sina() -> pd.DataFrame:
         params = {
             "p": page,
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         temp_df = pd.read_html(StringIO(r.text))[0].iloc[0:, :]
         big_df = pd.concat(objs=[big_df, temp_df], ignore_index=True)
     big_df["股票代码"] = big_df["股票代码"].astype(str).str.zfill(6)

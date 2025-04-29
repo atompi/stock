@@ -4,10 +4,15 @@
 Date: 2022/6/19 15:26
 Desc: 东方财富网-行情首页-沪深京 A 股
 """
-import requests
-import pandas as pd
 import math
 from functools import lru_cache
+
+import pandas as pd
+import requests
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+}
 
 
 def stock_zh_a_spot_em() -> pd.DataFrame:
@@ -33,22 +38,22 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
         "fields": "f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f14,f15,f16,f17,f18,f20,f21,f22,f23,f24,f25,f26,f37,f38,f39,f40,f41,f45,f46,f48,f49,f57,f61,f100,f112,f113,f114,f115,f221",
         "_": "1623833739532",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["data"]["diff"]
     if not data:
         return pd.DataFrame()
 
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df = pd.DataFrame(data)
     temp_df.columns = [
@@ -91,7 +96,7 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
         "每股净资产",
         "市盈率静",
         "市盈率TTM",
-        "报告期"
+        "报告期",
     ]
     temp_df = temp_df[
         [
@@ -134,7 +139,7 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
             "总市值",
             "流通市值",
             "所处行业",
-            "上市时间"
+            "上市时间",
         ]
     ]
     temp_df["最新价"] = pd.to_numeric(temp_df["最新价"], errors="coerce")
@@ -202,22 +207,22 @@ def code_id_map_em() -> dict:
         "fields": "f12",
         "_": "1623833739532",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["data"]["diff"]
     if not data:
         return dict()
 
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df = pd.DataFrame(data)
     temp_df["market_id"] = 1
@@ -237,22 +242,22 @@ def code_id_map_em() -> dict:
         "fields": "f12",
         "_": "1623833739532",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["data"]["diff"]
     if not data:
         return dict()
 
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df_sz = pd.DataFrame(data)
     temp_df_sz["sz_id"] = 0
@@ -271,22 +276,22 @@ def code_id_map_em() -> dict:
         "fields": "f12",
         "_": "1623833739532",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     data = data_json["data"]["diff"]
     if not data:
         return dict()
 
     data_count = data_json["data"]["total"]
-    page_count = math.ceil(data_count/page_size)
+    page_count = math.ceil(data_count / page_size)
     while page_count > 1:
         page_current = page_current + 1
         params["pn"] = page_current
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
         _data = data_json["data"]["diff"]
         data.extend(_data)
-        page_count =page_count - 1
+        page_count = page_count - 1
 
     temp_df_sz = pd.DataFrame(data)
     temp_df_sz["bj_id"] = 0
@@ -332,13 +337,11 @@ def stock_zh_a_hist(
         "end": end_date,
         "_": "1623766962675",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
     if not (data_json["data"] and data_json["data"]["klines"]):
         return pd.DataFrame()
-    temp_df = pd.DataFrame(
-        [item.split(",") for item in data_json["data"]["klines"]]
-    )
+    temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
     temp_df.columns = [
         "日期",
         "开盘",
@@ -409,11 +412,9 @@ def stock_zh_a_hist_min_em(
             "secid": f"{code_id_dict[symbol]}.{symbol}",
             "_": "1623766962675",
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
-        temp_df = pd.DataFrame(
-            [item.split(",") for item in data_json["data"]["trends"]]
-        )
+        temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["trends"]])
         temp_df.columns = [
             "时间",
             "开盘",
@@ -449,11 +450,9 @@ def stock_zh_a_hist_min_em(
             "end": "20500000",
             "_": "1630930917857",
         }
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, headers=headers)
         data_json = r.json()
-        temp_df = pd.DataFrame(
-            [item.split(",") for item in data_json["data"]["klines"]]
-        )
+        temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
         temp_df.columns = [
             "时间",
             "开盘",
@@ -528,11 +527,9 @@ def stock_zh_a_hist_pre_min_em(
         "secid": f"{code_id_dict[symbol]}.{symbol}",
         "_": "1623766962675",
     }
-    r = requests.get(url, params=params)
+    r = requests.get(url, params=params, headers=headers)
     data_json = r.json()
-    temp_df = pd.DataFrame(
-        [item.split(",") for item in data_json["data"]["trends"]]
-    )
+    temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["trends"]])
     temp_df.columns = [
         "时间",
         "开盘",
@@ -545,9 +542,7 @@ def stock_zh_a_hist_pre_min_em(
     ]
     temp_df.index = pd.to_datetime(temp_df["时间"])
     date_format = temp_df.index[0].date().isoformat()
-    temp_df = temp_df[
-        date_format + " " + start_time : date_format + " " + end_time
-    ]
+    temp_df = temp_df[date_format + " " + start_time : date_format + " " + end_time]
     temp_df.reset_index(drop=True, inplace=True)
     temp_df["开盘"] = pd.to_numeric(temp_df["开盘"])
     temp_df["收盘"] = pd.to_numeric(temp_df["收盘"])
@@ -585,9 +580,7 @@ if __name__ == "__main__":
     stock_zh_a_spot_em_df = stock_zh_a_spot_em()
     print(stock_zh_a_spot_em_df)
 
-    stock_zh_a_hist_min_em_df = stock_zh_a_hist_min_em(
-        symbol="000001", period='1'
-    )
+    stock_zh_a_hist_min_em_df = stock_zh_a_hist_min_em(symbol="000001", period='1')
     print(stock_zh_a_hist_min_em_df)
 
     stock_zh_a_hist_df = stock_zh_a_hist(
@@ -598,4 +591,3 @@ if __name__ == "__main__":
         adjust="hfq",
     )
     print(stock_zh_a_hist_df)
-
